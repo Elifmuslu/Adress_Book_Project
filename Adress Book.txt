@@ -1,0 +1,245 @@
+package javafxapplication2;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
+
+public class AdressBook {
+    private int id = 0;
+    private String name;
+    private String street;
+    private String city;
+    private String gender;
+    private int zip;
+    private final int DATALEN = 94;
+    private final int SIZESTRING = 36;
+    
+    final private  int NAME_SIZE  = 16;
+    final private  int STREET_SIZE = 16;
+    final private  int CITY_SIZE = 10;
+    final private  int GENDER_SIZE = 1;
+    
+    public AdressBook(int id, String name, String street, String city, String gender, int zip){
+        this.id = id;
+        this.name = name;
+        this.street = street;
+        this.city = city;
+        this.gender = gender;
+        this.zip = zip;
+        System.out.println("Here fire up!!");
+    }
+    public AdressBook(){
+    
+    }
+    public void write(RandomAccessFile raf) throws FileNotFoundException, IOException{
+        if(!this.search_id(this.id)){
+            raf.seek(raf.length());
+            raf.writeInt(this.id);
+            this.stringWrite(this.name, this.NAME_SIZE ,raf);
+            this.stringWrite(this.street, this.STREET_SIZE , raf);
+            this.stringWrite(this.city, this.CITY_SIZE ,raf);
+            this.stringWrite(String.valueOf(this.gender.charAt(0)), this.GENDER_SIZE , raf);
+            raf.writeInt(this.zip);
+            this.showSuccess("Addition is Successful");
+        }
+        else{
+            this.showError("Added Before");
+        }
+    }
+    
+    public boolean search_id(int id) throws FileNotFoundException, IOException{
+         RandomAccessFile raf = new RandomAccessFile("employee.dat", "rw");
+         int i = 0;
+         int times = 0;
+         boolean flag  = false;
+         
+         while(raf.length() != i ){
+            raf.seek(i);
+            if(id == raf.readInt()){
+                flag = true; 
+                break;
+            }
+            times += 1;
+            i = times * this.DATALEN;
+         }
+         raf.close();
+         return flag;
+         
+    }
+    
+      public void search_id(int id,RandomAccessFile raf,TextField input_id,TextField input_name,TextField input_street,TextField input_city, TextField input_gender, TextField input_zip) throws FileNotFoundException, IOException{
+        long old_position = raf.getFilePointer();
+         int i = 0;
+         int times = 0;
+         boolean flag  = false;
+         
+         while(raf.length() != i ){
+            raf.seek(i);
+            if(id == raf.readInt()){
+                flag = true; 
+                break;
+            }
+            times += 1;
+            i = times * this.DATALEN;
+         }
+         
+        if(flag){
+            input_id.setText(Integer.toString(id));
+            input_name.setText(this.reader(raf,this.NAME_SIZE));
+            input_street.setText(this.reader(raf,this.STREET_SIZE));
+            input_city.setText(this.reader(raf,this.CITY_SIZE));
+            input_gender.setText( this.reader(raf,this.GENDER_SIZE) );
+            input_zip.setText(Integer.toString(raf.readInt())); 
+         }
+        else{
+            raf.seek(old_position);
+            this.showError("Not Found");
+        }
+        
+         
+    }
+      
+     public void update_data(int id,RandomAccessFile raf,TextField input_id,TextField input_name,TextField input_street,TextField input_city, TextField input_gender, TextField input_zip) throws FileNotFoundException, IOException{
+        long old_position = raf.getFilePointer();
+         int i = 0;
+         int times = 0;
+         boolean flag  = false;
+         
+         while(raf.length() != i ){
+            raf.seek(i);
+            if(id == raf.readInt()){
+                raf.seek(i);
+                flag = true; 
+                break;
+            }
+            times += 1;
+            i = times * this.DATALEN;
+         }
+         
+        if(flag){
+               raf.writeInt(this.id);
+               this.stringWrite(this.name, this.NAME_SIZE ,raf);
+               this.stringWrite(this.street, this.STREET_SIZE ,raf);
+               this.stringWrite(this.city, this.CITY_SIZE ,raf);
+               this.stringWrite(String.valueOf(this.gender.charAt(0)),this.GENDER_SIZE , raf);
+               raf.writeInt(this.zip);
+               
+                input_id.setText(Integer.toString(this.id));
+                input_name.setText(this.name);
+                input_street.setText(this.street);
+                input_city.setText(this.city);
+                input_gender.setText( String.valueOf(this.gender.charAt(0) ) );
+                input_zip.setText(Integer.toString(this.zip)); 
+                this.showSuccess("Update is Successful");
+          
+        }
+        else{
+            raf.seek(old_position);
+            this.showError("Not Found");
+        }
+        
+         
+    }
+    
+    public void stringWrite(String s,int size,RandomAccessFile raf) throws IOException{
+         StringBuffer sb;
+         if (s != null)
+            sb = new StringBuffer(s);
+         else
+            sb = new StringBuffer();
+
+            sb.setLength(size);
+            raf.writeChars(sb.toString());
+    }
+    
+    public void starter(RandomAccessFile raf,TextField input_id,TextField input_name,TextField input_street,TextField input_city, TextField input_gender, TextField input_zip) throws FileNotFoundException, IOException{
+ 
+        if(raf.length() > 0){
+            raf.seek(0);
+            input_id.setText(Integer.toString(raf.readInt()));
+            input_name.setText(this.reader(raf,this.NAME_SIZE));
+            input_street.setText(this.reader(raf,this.STREET_SIZE));
+            input_city.setText(this.reader(raf,this.CITY_SIZE));
+            input_gender.setText( this.reader(raf,this.GENDER_SIZE) );
+            input_zip.setText(Integer.toString(raf.readInt())); 
+         }
+        
+         
+    }
+    
+     public void nextOne(RandomAccessFile raf,TextField input_id,TextField input_name,TextField input_street,TextField input_city, TextField input_gender, TextField input_zip) throws FileNotFoundException, IOException{
+        if(raf.length() > 0 && raf.length() > raf.getFilePointer()){
+            input_id.setText(Integer.toString(raf.readInt()));
+            input_name.setText(this.reader(raf,this.NAME_SIZE));
+            input_street.setText(this.reader(raf,this.STREET_SIZE));
+            input_city.setText(this.reader(raf,this.CITY_SIZE));
+            input_gender.setText( this.reader(raf,this.GENDER_SIZE) );
+            input_zip.setText(Integer.toString(raf.readInt())); 
+         }
+         else{
+         this.showError("Last Element");
+        }
+        
+         
+    }
+     
+     public void prevOne(RandomAccessFile raf,TextField input_id,TextField input_name,TextField input_street,TextField input_city, TextField input_gender, TextField input_zip) throws FileNotFoundException, IOException{
+        if(raf.length() > 0 && 0 < ( raf.getFilePointer() - this.DATALEN)  ){
+            raf.seek( raf.getFilePointer() - (2*this.DATALEN) );
+            input_id.setText(Integer.toString(raf.readInt()));
+            input_name.setText(this.reader(raf,this.NAME_SIZE));
+            input_street.setText(this.reader(raf,this.STREET_SIZE));
+            input_city.setText(this.reader(raf,this.CITY_SIZE));
+            input_gender.setText( this.reader(raf,this.GENDER_SIZE) );
+            input_zip.setText(Integer.toString(raf.readInt())); 
+         }
+         else{
+         this.showError("First Element");
+        }
+        
+         
+    }
+     
+    public void lastOne(RandomAccessFile raf,TextField input_id,TextField input_name,TextField input_street,TextField input_city, TextField input_gender, TextField input_zip) throws FileNotFoundException, IOException{
+        if(raf.length() > 0  ){
+            raf.seek( raf.length() - (this.DATALEN) );
+            input_id.setText(Integer.toString(raf.readInt()));
+            input_name.setText(this.reader(raf,this.NAME_SIZE));
+            input_street.setText(this.reader(raf,this.STREET_SIZE));
+            input_city.setText(this.reader(raf,this.CITY_SIZE));
+            input_gender.setText( this.reader(raf,this.GENDER_SIZE) );
+            input_zip.setText(Integer.toString(raf.readInt())); 
+         }
+         else{
+         this.showError("No element");
+        }
+        
+         
+    }
+       
+    public String reader(RandomAccessFile raf,int size) throws FileNotFoundException, IOException{
+        char temp[] = new char[size];
+        for(int i = 0 ; i < temp.length ; i++){
+            temp[i] = raf.readChar();
+        }
+        return  new String(temp);
+        
+    }
+    public  void showError(String errorMsg){
+            
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error Dialog");
+        alert.setContentText(errorMsg);
+
+        alert.show();
+    }
+    public void showSuccess(String s){
+       Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information Dialog");
+        alert.setContentText(s);
+
+        alert.show();
+    }
+}
