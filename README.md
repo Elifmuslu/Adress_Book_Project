@@ -1,0 +1,2 @@
+# Adress_Book_Project
+      We write a program that stores, retrieves, adds, updates and search addresses according  to id.  We use a fixed-length string for storing each attribute in the address. We use random access file for reading and writing an address. Assume that the size of id, name, street, city, gender, and zip is 4, 32, 32, 20, 2, 5 bytes, respectively. The id start from 1 and user  be able to search address with id number.
